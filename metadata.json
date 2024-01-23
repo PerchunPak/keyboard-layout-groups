@@ -1,6 +1,8 @@
 {
-    "name": "Switch to last keyboard layout",
-    "description": "Switch to latest previously used keyboard layout",
-    "uuid": "switch-to-last-keyboard-layout@envek",
-    "shell-version": ["41"]
+  "name": "Keyboard layout groups",
+  "description": "Keyboard layout groups",
+  "uuid": "keyboard-layout-groups@perchun",
+  "shell-version": [
+    "45"
+  ]
 }
