@@ -6,8 +6,9 @@
 // Usage:
 // gdbus call --session --dest org.gnome.Shell --object-path /org/gnome/Shell/Extensions/SwitchToLastKeyboardLayout --method org.gnome.Shell.Extensions.SwitchToLastKeyboardLayout.Call
 
-const { Gio } = imports.gi;
-const { getInputSourceManager } = imports.ui.status.keyboard;
+import { Extension } from "resource:///org/gnome/shell/extensions/extension.js";
+import Gio from "gi://Gio";
+import { getInputSourceManager } from "resource:///org/gnome/shell/ui/status/keyboard.js";
 
 const MR_DBUS_IFACE = `
 <node>
@@ -17,7 +18,7 @@ const MR_DBUS_IFACE = `
     </interface>
 </node>`;
 
-class Extension {
+export default class MyExtension extends Extension {
     enable() {
         this._dbus = Gio.DBusExportedObject.wrapJSObject(MR_DBUS_IFACE, this);
         this._dbus.export(
@@ -35,8 +36,4 @@ class Extension {
     Call() {
         getInputSourceManager()._mruSources[1].activate();
     }
-}
-
-function init() {
-    return new Extension();
 }
