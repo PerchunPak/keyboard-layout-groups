@@ -1,5 +1,4 @@
 import { Extension } from "resource:///org/gnome/shell/extensions/extension.js";
-import GLib from "gi://GLib";
 import Gio from "gi://Gio";
 import { getInputSourceManager } from "resource:///org/gnome/shell/ui/status/keyboard.js";
 
@@ -22,61 +21,6 @@ const MR_DBUS_IFACE = `
     </interface>
 </node>`;
 
-/**
- * Always operates only inside our `.config` folder.
- */
-class Filesystem {
-    /**
-     * @param {string | undefined} path if undefined - whole directory
-     */
-    constructor(path) {
-        this.path = Gio.File.new_for_path(
-            GLib.build_filenamev([
-                GLib.get_home_dir(),
-                ".config",
-                "keyboard-layouts",
-                ...(path === undefined ? [] : [path]),
-            ])
-        );
-    }
-
-    mkdir_with_parents() {
-        try {
-            this.path.make_directory_with_parents(null);
-        } catch (e) {
-            console.warn("error during creating config folder", e);
-        }
-    }
-
-    /**
-     * @param {string} content
-     */
-    write(content) {
-        this.path
-            .create(Gio.FileCreateFlags.NONE, null)
-            .write_bytes(new GLib.Bytes(content), null);
-    }
-
-    /**
-     * @param {string} content
-     */
-    overwrite(content) {
-        this.path
-            .replace(null, false, Gio.FileCreateFlags.NONE, null)
-            .write_bytes(new GLib.Bytes(content), null);
-    }
-
-    /**
-     * @returns {string}
-     */
-    read() {
-        const [ok, contents, etag] = this.path.load_contents(null);
-
-        const decoder = new TextDecoder("utf-8");
-        return decoder.decode(contents);
-    }
-}
-
 export default class MyExtension extends Extension {
     enable() {
         this._dbus = Gio.DBusExportedObject.wrapJSObject(MR_DBUS_IFACE, this);
@@ -85,30 +29,9 @@ export default class MyExtension extends Extension {
             "/org/gnome/Shell/Extensions/KeyboardLayoutGroups"
         );
 
-        this.#readData();
-    }
-
-    #readData() {
-        new Filesystem().mkdir_with_parents(); // create config directory if not exists
-
-        for (const [file_name, default_value] of [
-            ["group.txt", "lat"],
-            ["lat_lang.txt", "us"],
-            ["cyr_lang.txt", "ua"],
-        ]) {
-            try {
-                new Filesystem(file_name).write(default_value);
-            } catch (e) {
-                console.warn(
-                    "error during writing default value to config files",
-                    e
-                );
-            }
-        }
-
-        this._current_group = new Filesystem("group.txt").read();
-        this._lat_lang = new Filesystem("lat_lang.txt").read();
-        this._cyr_lang = new Filesystem("cyr_lang.txt").read();
+        this._current_group = "lat";
+	this._lat_lang = "us";
+	this._cyr_lang = "ua"
     }
 
     disable() {
@@ -121,7 +44,6 @@ export default class MyExtension extends Extension {
      * @param {'lat' | 'cyr'} to
      */
     #switchGroup(new_group) {
-        new Filesystem("group.txt").overwrite(new_group);
         this._current_group = new_group;
     }
 
@@ -130,10 +52,8 @@ export default class MyExtension extends Extension {
      */
     #switchLayout(new_layout) {
         if (this._current_group == "lat") {
-            new Filesystem("lat_lang.txt").overwrite(new_layout);
             this._lat_lang = new_layout;
         } else {
-            new Filesystem("cyr_lang.txt").overwrite(new_layout);
             this._cyr_lang = new_layout;
         }
 
