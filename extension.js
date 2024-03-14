@@ -1,6 +1,9 @@
 import { Extension } from "resource:///org/gnome/shell/extensions/extension.js";
 import Gio from "gi://Gio";
 import { getInputSourceManager } from "resource:///org/gnome/shell/ui/status/keyboard.js";
+import * as Main from "resource:///org/gnome/shell/ui/main.js";
+import Meta from "gi://Meta";
+import Shell from "gi://Shell";
 
 // group names cannot be changed and new groups cannot be added from here
 // this is because im lazy. if you need - modify the code/open an issue/dm me
@@ -11,33 +14,39 @@ const LAYOUT = [
     ["us", "cz+qwerty"],
 ];
 
-const MR_DBUS_IFACE = `
-<node>
-    <interface name="org.gnome.Shell.Extensions.KeyboardLayoutGroups">
-        <method name="ChangeGroup">
-        </method>
-        <method name="ChangeLayout">
-        </method>
-    </interface>
-</node>`;
-
 export default class MyExtension extends Extension {
     enable() {
-        this._dbus = Gio.DBusExportedObject.wrapJSObject(MR_DBUS_IFACE, this);
-        this._dbus.export(
-            Gio.DBus.session,
-            "/org/gnome/Shell/Extensions/KeyboardLayoutGroups"
+        this._settings = this.getSettings(
+            "org.gnome.shell.extensions.keyboard-layout-groups",
         );
+        this.#addKeybinds();
 
         this._current_group = "lat";
-	this._lat_lang = "us";
-	this._cyr_lang = "ua"
+        this._lat_lang = "us";
+        this._cyr_lang = "ua";
     }
 
     disable() {
-        this._dbus.flush();
-        this._dbus.unexport();
-        delete this._dbus;
+        Main.wm.removeKeybinding("change-keyboard-layout-group");
+        Main.wm.removeKeybinding("change-keyboard-layout");
+    }
+
+    #addKeybinds() {
+        Main.wm.addKeybinding(
+            "change-keyboard-layout-group",
+            this._settings,
+            Meta.KeyBindingFlags.IGNORE_AUTOREPEAT,
+            Shell.ActionMode.NORMAL | Shell.ActionMode.OVERVIEW,
+            this.ChangeGroup,
+        );
+
+        Main.wm.addKeybinding(
+            "change-keyboard-layout",
+            this._settings,
+            Meta.KeyBindingFlags.IGNORE_AUTOREPEAT,
+            Shell.ActionMode.NORMAL | Shell.ActionMode.OVERVIEW,
+            this.ChangeLayout,
+        );
     }
 
     /**
@@ -65,7 +74,7 @@ export default class MyExtension extends Extension {
     ChangeGroup() {
         if (this._current_group == "lat") {
             this.#switchGroup("cyr");
-            this.#switchLayout(this._cyr_lang)
+            this.#switchLayout(this._cyr_lang);
         } else {
             this.#switchGroup("lat");
             this.#switchLayout(this._lat_lang);

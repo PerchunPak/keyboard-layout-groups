@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist>
+    <schema id="org.gnome.shell.extensions.keyboard-layout-groups" path="/org/gnome/shell/extensions/keyboard-layout-groups@perchun/">
+        <key name="change-keyboard-layout-group" type="as">
+            <default><![CDATA[['<Shift><Alt>']]]></default>
+            <summary>Hotkey to change layout groups.</summary>
+        </key>
+        <key name="change-keyboard-layout" type="as">
+            <default><![CDATA[['<Shift><Ctrl>']]]></default>
+            <summary>Hotkey to change layouts.</summary>
+        </key>
+    </schema>
+</schemalist>

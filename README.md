@@ -11,17 +11,14 @@ Lack of this feature on Linux holded me from switching to it for a long time, bu
 ## Installation
 
 ```bash
-git clone https://PerchunPak/keyboard-layout-groups ~/.local/share/gnome-shell/extensions/keyboard-layout-groups@perchun
+git clone --depth 1 https://PerchunPak/keyboard-layout-groups ~/.local/share/gnome-shell/extensions/keyboard-layout-groups@perchun
+cd ~/.local/share/gnome-shell/extensions/keyboard-layout-groups@perchun
+glib-compile-schemas schemas/
 ```
 
-Relogin to your PC, so GNOME could detect a new extention. Then enable the extention and add custom keybinds to these commands:
+Relogin to your PC, so GNOME could detect a new extention. Then bindings Shift + Alt should switch groups and Shift + Ctrl should switch layouts inside groups.
 
-```bash
-# Switch groups
-gdbus call --session --dest org.gnome.Shell --object-path /org/gnome/Shell/Extensions/KeyboardLayoutGroups --method org.gnome.Shell.Extensions.KeyboardLayoutGroups.ChangeGroup
-# Switch layouts
-gdbus call --session --dest org.gnome.Shell --object-path /org/gnome/Shell/Extensions/KeyboardLayoutGroups --method org.gnome.Shell.Extensions.KeyboardLayoutGroups.ChangeLayout
-```
+If you want to customize keybindings/languages - you have to modify source code.
 
 ---
 
